@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Layout wrapper -->
+    <!-- <h1>{{ 'NOT REGISTERED' if not registered else 'REGISTERED USER' }}</h1> -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+          <div class="app-brand">
+            <span class="app-brand-logo">
+              <img src="{{ url_for('static', filename='images/logo_lg.png') }}" class="brand-logo-img" style="margin: 30px auto;">
+            </span>
+          </div>
+          <div class="menu-inner-shadow"></div>
+          {% if registered %}
+          <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Your shelf</span>
+          </li>
+          <ul class="menu-inner py-1">
+            <li class="menu-item">
+              <a class="menu-link cursor-pointer" data-bs-toggle="modal" data-bs-target="#addBook">
+                <i class="menu-icon tf-icons ti ti-mail"></i>
+                <div>Add book</div>
+              </a>
+            </li>
+            <li class="menu-item {{ 'active' if request.args.get('filter') == 'my_books' else '' }}">
+              <a href="{{ url_for('index', filter='my_books') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-mail"></i>
+                <div>My books list</div>
+              </a>
+            </li>
+          {% endif %}
+          <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">All shelfs</span>
+          </li>
+          <li class="menu-item {{ 'active' if not request.args.get('category_id') and not request.args.get('filter') else '' }}">
+            <a href="{{ url_for('index') }}" class="menu-link">
+              <div>All Books</div>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="app-email.html" class="menu-link">
+              <i class="menu-icon tf-icons ti ti-mail"></i>
+              <div>Top rated</div>
+            </a>
+          </li>
+          <li class="menu-item active open">
+            <a href="" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons ti ti-id"></i>
+              <div>Categories</div>
+              <div class="badge bg-label-primary rounded-pill ms-auto">{{ categories | length }}</div>
+            </a>
+            <ul class="menu-sub">
+              {% for category in categories %}
+              <li class="menu-item {{ 'active' if request.args.get('category_id') == category.category_id|string else '' }}">
+                <a href="{{ url_for('index', category_id=category.category_id) }}" class="menu-link">
+                  <div>{{ category.category_name }}</div>
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+        </ul>
+        </aside>
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+              <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                <i class="ti ti-menu-2 ti-sm"></i>
+              </a>
+            </div>
+            <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+              <!-- Search -->
+              <div class="navbar-nav align-items-center">
+                <div class="nav-item navbar-search-wrapper mb-0">
+                  <i class="ti ti-search ti-md me-2"></i>
+                </div>
+                <div class="navbar-search-wrapper search-input-wrapper position-relative">
+                  <form action="{{ url_for('index') }}" method="get" id="search-form">
+                    <input type="text" name="search" id="search-input" class="form-control search-input container-xxl border-0 pr-4" placeholder="Search by title, author, or ISBN..." aria-label="Search..." value="{{ search_query or '' }}" style="padding-right: 15px;">
+                    <i class="ti ti-x ti-sm search-toggler cursor-pointer position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%);"></i>
+                    {% if request.args.get('category_id') %}
+                      <input type="hidden" name="category_id" value="{{ request.args.get('category_id') }}">
+                    {% endif %}
+                    {% if request.args.get('filter') %}
+                      <input type="hidden" name="filter" value="{{ request.args.get('filter') }}">
+                    {% endif %}
+                  </form>
+                </div>
+              </div>
+              <!-- /Search -->
+              <ul class="navbar-nav flex-row align-items-center ms-auto">
+                <!-- Language -->
+                <li class="nav-item dropdown-language dropdown me-2 me-xl-0">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="" data-bs-toggle="dropdown">
+                    <i class="fi fi-us fis rounded-circle me-1 fs-3"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="" data-language="en"><i class="fi fi-us fis rounded-circle me-1 fs-3"></i><span class="align-middle">English</span></a></li>
+                    <li><a class="dropdown-item" href="" data-language="fr"><i class="fi fi-fr fis rounded-circle me-1 fs-3"></i><span class="align-middle">French</span></a></li>
+                    <li><a class="dropdown-item" href="" data-language="de"><i class="fi fi-de fis rounded-circle me-1 fs-3"></i><span class="align-middle">German</span></a></li>
+                    <li><a class="dropdown-item" href="" data-language="pt"><i class="fi fi-pt fis rounded-circle me-1 fs-3"></i><span class="align-middle">Portuguese</span></a></li>
+                  </ul>
+                </li>
+                <!--/ Language -->
+                {% if not registered %}
+                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
+                  <a href="{{ url_for('login') }}" class="btn btn-primary waves-effect waves-light">Sign In</a>
+                </li>
+                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
+                  <a href="{{ url_for('register') }}" class="btn btn-outline-primary waves-effect">Register</a>
+                </li>
+                {% else %}
+                <!-- Notification -->
+                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <i class="ti ti-bell ti-md"></i>
+                    <span class="badge bg-danger rounded-pill badge-notifications">{{ notifications | length }}</span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end py-0">
+                    <li class="dropdown-menu-header border-bottom">
+                      <div class="dropdown-header d-flex align-items-center py-3">
+                        <h5 class="text-body mb-0 me-auto">Notification</h5>
+                        <a href="javascript:void(0)" class="dropdown-notifications-all text-body" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read">
+                          <i class="ti ti-mail-opened fs-4"></i>
+                        </a>
+                      </div>
+                    </li>
+                    <li class="dropdown-notifications-list scrollable-container">
+                      <ul class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                        <li class="list-group-item list-group-item-action dropdown-notifications-item"
+                          {% if notification.is_sender and notification.request_status == 'Confirmed' %}
+                              data-bs-toggle="modal" data-bs-target="#confirmSwapModal-{{ notification.request_id }}"
+                          {% elif not notification.is_sender and notification.request_status == 'Pending' %}
+                              data-bs-toggle="modal" data-bs-target="#confirmRequestModal-{{ notification.request_id }}"
+                          {% elif notification.request_status == 'Approved' %}
+                              data-bs-toggle="modal" data-bs-target="#swapContactModal-{{ notification.request_id }}"
+                          {% endif %}>
+                          <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                              <div>
+                                <img src="{{ notification.book_image_url }}" alt="{{ notification.book_title }}" class="h-auto" style="max-width:70px;"/>
+                              </div>
+                            </div>
+                            <div class="flex-grow-1" style="display: flex; flex-direction: column;">
+                              <h6 class="mb-1">{{ notification.book_title }}</h6>
+                              <p class="mb-1">{{ notification.sender_comment }}</p>
+                              <div class="book-elements" style="margin-top: auto;">
+                                <span class="{{ notification.status_class }}">{{ notification.request_status }}</span>
+                                <small class="text-muted">{{ notification.hours_ago }}h ago</small>
+                              </div>
+                            </div>
+                            <div class="flex-shrink-0 dropdown-notifications-actions">
+                              <a href="javascript:void(0)" class="dropdown-notifications-archive" onclick="confirmDelete({{ notification.request_id }})">
+                                <span class="ti ti-x"></span>
+                              </a>
+                            </div>
+                          </div>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                    <li class="dropdown-menu-footer border-top">
+                      <a href="" class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40 mb-1 align-items-center">
+                        View all notifications
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                <!--/ Notification -->
+                <!-- User -->
+                <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="" data-bs-toggle="dropdown">
+                    <div class="avatar avatar-online">
+                      <img src="{{ url_for('static', filename='images/avatars/avatar-1.png') }}" alt class="h-auto rounded-circle" />
+                    </div>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#updateProfile">
+                        <i class="ti ti-user-check me-2 ti-sm"></i>
+                        <span class="align-middle">My Profile</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('logout') }}">
+                        <i class="ti ti-logout me-2 ti-sm"></i>
+                        <span class="align-middle">Log Out</span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </nav>
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+            {% if books %}
+              <div class="container-xxl flex-grow-1 container-p-y">
+                  <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+                    {% for book in books %}
+                      <div class="col">
+                        <div class="card h-100 p-2">
+                          <img class="card-img-top main-cover" src="{{ book.book_image_url }}" alt="{{ book.book_title }}" />
+                          <div class="card-body">
+                            <h5 class="card-title">{{ book.book_title }}</h5>
+                            <p class="card-text">{{ book.book_description|truncate(150, true, '...') }}</p>
+                            <div class="book-elements">
+                              <h6 class="card-title">ISBN: {{ book.book_isbn }}</h6>
+                              <!-- <h6 class="card-title cursor-pointer text-decoration-underline" data-bs-toggle="modal" data-bs-target="#bookComment">Comments: 23</h6> -->
+                            </div>
+                            {% if registered and user %}
+                              {% if book.book_owner_id == user.user_id %}
+                                <a class="btn btn-dark waves-effect waves-light book-btn" href="{{ url_for('edit_book', book_id=book.book_id) }}" data-bs-toggle="modal" data-bs-target="#editBookModal-{{ book.book_id }}" style="color:#fff;">Edit book</a>
+                              {% elif book.book_id in pending_request_book_ids %}
+                                <a class="btn btn-secondary waves-effect waves-light book-btn" style="color:#fff;">The Swap is pending</a>
+                              {% elif book.book_id in confirmed_request_book_ids %}
+                                <a class="btn btn-warning waves-effect waves-light book-btn" style="color:#fff;">The Swap is confirmed</a>
+                              {% elif book.book_id in approved_request_book_ids %}
+                                <a class="btn btn-success waves-effect waves-light book-btn" style="color:#fff;">The Swap is approved</a>
+                              {% else %}
+                                <a class="btn btn-primary waves-effect waves-light book-btn" data-bs-toggle="modal" data-bs-target="#sendRequestModal-{{ book.book_id }}" style="color:#fff;">Send swap request</a>
+                              {% endif %}
+                            {% else %}
+                              <a href="{{ url_for('login') }}" class="btn btn-primary waves-effect waves-light book-btn">Sign In</a>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+              </div>
+            {% else %}
+              <p>No books available.</p>
+            {% endif %}
+            <!-- / Content -->
+
+            <!-- Footer -->
+            <footer class="content-footer footer bg-footer-theme">
+              <div class="container-xxl">
+                <div class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column">
+                  <div>
+                    © <script>document.write(new Date().getFullYear());</script>, made with ❤️ by Mariia & Darya
+                  </div>
+                  <div>
+                    <a href="" class="footer-link me-4" target="_blank">License</a>
+                    <a href="" class="footer-link me-4" target="_blank">Privacy policy</a>
+                    <a href="" class="footer-link me-4" target="_blank">Terms</a>
+                    <a href="" target="_blank" class="footer-link d-none d-sm-inline-block">Support</a>
+                  </div>
+                </div
+
+>
+              </div>
+            </footer>
+            <!-- / Footer -->
+
+            <div class="content-backdrop fade"></div>
+          </div>
+          <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <div class="layout-overlay layout-menu-toggle"></div>
+      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+      <div class="drag-target"></div>
+    </div>
+
+    <!-- Messages Modal -->
+    <div class="modal fade" id="messagesModal" tabindex="-1" aria-labelledby="messageContent" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="text-center p-4">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <h3 class="modal-title" id="messageContent">{{ messages[0] }}</h3>
+              {% else %}
+                <h3 class="modal-title" id="messageContent">All done!</h3>
+              {% endif %}
+            {% endwith %}
+          </div>
+          <div class="text-center p-4">
+            <button type="button" class="btn btn-primary me-sm-3 me-1 waves-effect waves-light" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="updateProfile" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% include 'profile.html' %}
+      </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div class="modal fade" id="addBook" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% include 'addbook.html' %}
+      </div>
+    </div>
+
+    <!-- Edit Book Modal -->
+    {% for book in books %}
+    <div class="modal fade" id="editBookModal-{{ book.book_id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% include 'editbook.html' %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Send Request Modals -->
+    {% for book in books %}
+    <div class="modal fade" id="sendRequestModal-{{ book.book_id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% include 'sendRequest.html' %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Confirm Swap Modals -->
+    {% for notification in notifications %}
+    {% if notification.is_sender and notification.request_status == 'Confirmed' %}
+    <div class="modal fade" id="confirmSwapModal-{{ notification.request_id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% set req = notification %}
+        {% set book = notification.book %}
+        {% set swap_book = req.swap_book %}
+        {% include 'confirmSwap.html' %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Swap Contact Modals -->
+    {% for notification in notifications %}
+    {% if notification.request_status == 'Approved' %}
+    <div class="modal fade" id="swapContactModal-{{ notification.request_id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% set req = notification %}
+        {% set book = notification.book %}
+        {% set swap_book = notification.swap_book %}
+        {% set sender_user = notification.sender_user %}
+        {% set receiver_user = notification.receiver_user %}
+        {% include 'swapContact.html' %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Confirm Request Modals -->
+    {% for notification in notifications %}
+    {% if not notification.is_sender and notification.request_status == 'Pending' %}
+    <div class="modal fade" id="confirmRequestModal-{{ notification.request_id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        {% set req = notification %}
+        {% set book = notification.book %}
+        {% set sender_books = notification.sender_books %}
+        {% include 'confirmRequest.html' %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+{% endblock %}

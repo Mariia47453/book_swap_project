@@ -1,0 +1,9 @@
+venv/
+markup/
+__pycache__/
+*.pyc
+.env
+*.log
+.DS_Store
+app/static/fonts/
+app/static/images

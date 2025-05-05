@@ -1,0 +1,38 @@
+<form method="POST" action="{{ url_for('send_request', book_id=book.book_id) }}">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Send Swap Request</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_title">Book title</label>
+          <input type="text" id="book_title" name="book_title" value="{{ book.book_title }}" class="form-control" style="background-color: rgba(75, 70, 92, 0.08);" readonly/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_author">Author</label>
+          <input type="text" id="book_author" name="book_author" value="{{ book.book_author }}" class="form-control" style="background-color: rgba(75, 70, 92, 0.08);" readonly/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="request_comment">Comment</label>
+          <textarea id="request_comment" name="request_comment" class="form-control" placeholder="Enter short comment" required></textarea>
+        </div>
+      </div>
+
+      <input type="hidden" name="sender_id" value="{{ user.user_id }}">
+      <input type="hidden" name="receiver_id" value="{{ book.book_owner_id }}">
+      <input type="hidden" name="request_book_id" value="{{ book.book_id }}">
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-primary">Send request</button>
+      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+</form>

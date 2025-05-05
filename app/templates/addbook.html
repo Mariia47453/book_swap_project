@@ -1,0 +1,63 @@
+<form method="POST" action="{{ url_for('add_book') }}">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Add new book</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_title">Book title</label>
+          <input type="text" id="book_title" name="book_title" value="" class="form-control" placeholder="Enter Book Title" required/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_category">Category</label>
+          <select id="book_category" name="book_category" class="select2 form-select" data-allow-clear="true">
+            <option value="">Select</option>
+            {% for category in categories %}
+            <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_image_url">Image URL</label>
+          <input type="text" id="book_image_url" name="book_image_url" value="" class="form-control" placeholder="Enter image URL" required/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_author">Author</label>
+          <input type="text" id="book_author" name="book_author" value="" class="form-control" placeholder="Enter author" required/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_description">Description</label>
+          <textarea id="book_description" name="book_description" class="form-control" placeholder="Enter short description" required></textarea>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="book_isbn">ISBN13</label>
+          <input type="text" id="book_isbn" name="book_isbn" value="" class="form-control" placeholder="Enter ISBN number" required/>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+        Close
+      </button>
+      <button type="submit" class="btn btn-primary">Save book</button>
+    </div>
+  </div>
+</form>

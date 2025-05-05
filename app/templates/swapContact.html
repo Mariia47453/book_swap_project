@@ -1,0 +1,26 @@
+<form method="POST" action="{{ url_for('delete_request', request_id=req.request_id) }}">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Swap Contacts</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="sender_id">Owner of {{ swap_book.book_title }}</label>
+          <input type="text" id="sender_id" name="sender_id" value="{{ sender_user.username }} - {{ sender_user.email }}" class="form-control" style="background-color: rgba(75, 70, 92, 0.08);" readonly/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col mb-3">
+          <label class="form-label" for="receiver_id">Owner of {{ book.book_title }}</label>
+          <input type="text" id="receiver_id" name="receiver_id" value="{{ receiver_user.username }} - {{ receiver_user.email }}" class="form-control" style="background-color: rgba(75, 70, 92, 0.08);" readonly/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this request?');">Delete Request</button>
+      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+</form>
